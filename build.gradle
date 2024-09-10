@@ -1,0 +1,60 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.3.2'
+	id 'io.spring.dependency-management' version '1.1.2'
+	id 'com.github.johnrengelman.shadow' version '7.1.2'
+}
+
+// Set up the toolchain for Java
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(17)
+	}
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+	implementation platform('software.amazon.awssdk:bom:2.20.130')
+	// S3 imports
+	implementation 'software.amazon.awssdk:s3'
+	// DynamoDB imports
+	implementation 'software.amazon.awssdk:dynamodb-enhanced'
+	implementation 'software.amazon.awssdk:url-connection-client:2.27.21'
+	implementation 'com.amazonaws:aws-lambda-java-core:1.2.1'
+	implementation 'com.amazonaws:aws-lambda-java-events:3.11.0'
+
+	// Ensure Lombok is processed before MapStruct
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+
+	// MapStruct dependencies
+	implementation 'org.mapstruct:mapstruct:1.6.0' // Use as a regular dependency
+	annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.0' // Use for processing
+
+	// For testing and other utilities
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	implementation 'org.reflections:reflections:0.9.12'
+}
+
+// Make sure annotation processors are specified in the correct order
+tasks.withType(JavaCompile) {
+	options.annotationProcessorPath = configurations.annotationProcessor
+}
+
+// Additional configurations for tasks and testing
+tasks.named('test') {
+	useJUnitPlatform()
+}
