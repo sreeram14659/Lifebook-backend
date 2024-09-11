@@ -29,7 +29,7 @@ import java.util.Optional;
 @AllArgsConstructor
 public class MemoryHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
     private static final String LIFE_ENTITIES_TABLE = "LifeEntity";
-    private static final String GET_MEMORIES_BY_ID_PATH_REGEX = "^/default/memories/[^/]+$";
+    private static final String GET_MEMORIES_BY_ID_PATH_REGEX = "^/default/memory/[^/]+$";
     private static final String GET_MEMORIES_PATH = "/default/memories";
     private static final String POST_MEMORY_PATH = "/default/memory";
 

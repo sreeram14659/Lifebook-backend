@@ -57,4 +57,13 @@ public class MemoriesDataManager {
             throw new IllegalArgumentException("Entity must be of type 'Memory'");
         }
     }
+
+    public UnifiedEntity deleteMemory(final String memoryId) {
+        UnifiedEntity entity = dynamoDBStore.get(memoryId, EntityType.Memory.name());
+        if (entity != null && entity.getEntityType() == EntityType.Memory) {
+            return dynamoDBStore.delete(entity);
+        } else {
+            throw new RuntimeException("Memory not found");
+        }
+    }
 }
