@@ -62,6 +62,8 @@ public class MemoryHandler implements RequestHandler<APIGatewayProxyRequestEvent
                 }
             } else if ("POST".equals(httpMethod) && POST_MEMORY_PATH.equals(path)) {
                 response = handlePutMemoryRequest(input);
+            } else if ("DELETE".equals(httpMethod) && path.matches(GET_MEMORIES_BY_ID_PATH_REGEX)) {
+                response = handleDeleteMemoryRequest(input);
             } else {
                 response = new APIGatewayProxyResponseEvent().withStatusCode(405).withBody("HTTP Method Not Allowed");
             }
@@ -90,12 +92,33 @@ public class MemoryHandler implements RequestHandler<APIGatewayProxyRequestEvent
     }
 
     private APIGatewayProxyResponseEvent handleGetMemoryByIdRequest(final APIGatewayProxyRequestEvent input) throws JsonProcessingException {
-        Map<String, String> pathParameters = input.getPathParameters();
-        String memoryId = pathParameters.get("id");
-        GetMemoryByIdResponse getMemoryByIdResponse = Optional.ofNullable(memoryId).map(id -> {
-            GetMemoryByIdRequest request = GetMemoryByIdRequest.builder().memoryId(id).build();
-            return memoriesDataManager.fetchMemoryById(request);
-        }).orElseThrow(() -> new IllegalStateException("Memory ID required"));
-        return new APIGatewayProxyResponseEvent().withStatusCode(200).withBody(objectMapper.writeValueAsString(getMemoryByIdResponse));
+        try {
+            Map<String, String> pathParameters = input.getPathParameters();
+            String memoryId = pathParameters.get("id");
+            GetMemoryByIdResponse getMemoryByIdResponse = Optional.ofNullable(memoryId).map(id -> {
+                GetMemoryByIdRequest request = GetMemoryByIdRequest.builder().memoryId(id).build();
+                return memoriesDataManager.fetchMemoryById(request);
+            }).orElseThrow(() -> new IllegalStateException("Memory ID required"));
+            return new APIGatewayProxyResponseEvent().withStatusCode(200).withBody(objectMapper.writeValueAsString(getMemoryByIdResponse));
+        } catch (Exception e) {
+            return new APIGatewayProxyResponseEvent().withStatusCode(500).withBody("Error processing the deletion request: " + e.getMessage());
+        }
+    }
+
+    private APIGatewayProxyResponseEvent handleDeleteMemoryRequest(final APIGatewayProxyRequestEvent input) {
+        try {
+            Map<String, String> pathParameters = input.getPathParameters();
+            String memoryId = pathParameters.get("id");
+            UnifiedEntity deletedEntity = Optional.ofNullable(memoryId).map(id -> {
+                return memoriesDataManager.deleteMemory(memoryId);
+            }).orElseThrow(() -> new IllegalStateException("Memory ID required for deletion"));
+            if (deletedEntity != null) {
+                return new APIGatewayProxyResponseEvent().withStatusCode(200).withBody(objectMapper.writeValueAsString(deletedEntity));
+            } else {
+                return new APIGatewayProxyResponseEvent().withStatusCode(404).withBody("Memory not found");
+            }
+        } catch (Exception e) {
+            return new APIGatewayProxyResponseEvent().withStatusCode(500).withBody("Error processing GetMemoryById request: " + e.getMessage());
+        }
     }
 }
