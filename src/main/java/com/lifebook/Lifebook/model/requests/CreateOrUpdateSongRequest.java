@@ -30,6 +30,7 @@ public class CreateOrUpdateSongRequest extends GenericRequest {
 
     private String songUrl;
     private String albumArtUrl;
+    private boolean viewed;
 
     public static Song toSongEntity(CreateOrUpdateSongRequest request) {
         return Song.builder()
@@ -46,6 +47,7 @@ public class CreateOrUpdateSongRequest extends GenericRequest {
             .sharedWith(request.getSharedWith())
             .entityType(request.getEntityType())
             .priority(request.getPriority())
+            .viewed(request.isViewed())
             .build();
     }
 }

@@ -14,6 +14,7 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbAttri
 public class Song extends UnifiedEntity {
     private String songUrl;
     private String albumArtUrl;
+    private boolean viewed;
 
     @DynamoDbAttribute("songUrl")
     public String getSongUrl() {
@@ -22,5 +23,9 @@ public class Song extends UnifiedEntity {
     @DynamoDbAttribute("albumArtUrl")
     public String getAlbumArtUrl() {
         return albumArtUrl;
+    }
+    @DynamoDbAttribute("viewed")
+    public boolean isViewed() {
+        return viewed;
     }
 }

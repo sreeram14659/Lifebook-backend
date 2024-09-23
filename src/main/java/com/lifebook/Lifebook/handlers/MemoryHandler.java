@@ -109,9 +109,7 @@ public class MemoryHandler implements RequestHandler<APIGatewayProxyRequestEvent
         try {
             Map<String, String> pathParameters = input.getPathParameters();
             String memoryId = pathParameters.get("id");
-            UnifiedEntity deletedEntity = Optional.ofNullable(memoryId).map(id -> {
-                return memoriesDataManager.deleteMemory(memoryId);
-            }).orElseThrow(() -> new IllegalStateException("Memory ID required for deletion"));
+            UnifiedEntity deletedEntity = Optional.ofNullable(memoryId).map(id -> memoriesDataManager.deleteMemory(memoryId)).orElseThrow(() -> new IllegalStateException("Memory ID required for deletion"));
             if (deletedEntity != null) {
                 return new APIGatewayProxyResponseEvent().withStatusCode(200).withBody(objectMapper.writeValueAsString(deletedEntity));
             } else {
