@@ -1,4 +1,4 @@
-package com.lifebook.Lifebook.configuration;
+package com.lifebook.Lifebook.dagger.modules;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -7,9 +7,22 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
+import com.lifebook.Lifebook.dynamodb.DynamoDBStore;
+import com.lifebook.Lifebook.fetcher.MemoriesDataManager;
+import com.lifebook.Lifebook.fetcher.SongsDataManager;
+import com.lifebook.Lifebook.model.UnifiedEntity;
+import dagger.Module;
+import dagger.Provides;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 
+import javax.inject.Singleton;
+
+@Module
 public class Configuration {
 
+    @Provides
+    @Singleton
     public static ObjectMapper objectMapper() {
         ObjectMapper mapper = new ObjectMapper();
 
@@ -24,7 +37,24 @@ public class Configuration {
 
         // Deserialization settings
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false); // Ignore unknown properties
-//        mapper.enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES);
         return mapper;
+    }
+
+    @Provides
+    @Singleton
+    public DynamoDBStore dynamoDBStore(DynamoDbEnhancedClient dynamoDbEnhancedClient, DynamoDbTable<UnifiedEntity> table) {
+        return new DynamoDBStore(table, dynamoDbEnhancedClient);
+    }
+
+    @Provides
+    @Singleton
+    public MemoriesDataManager memoriesDataManager(DynamoDBStore dynamoDBStore) {
+        return new MemoriesDataManager(dynamoDBStore);
+    }
+
+    @Provides
+    @Singleton
+    public SongsDataManager songsDataManager(DynamoDBStore dynamoDBStore) {
+        return new SongsDataManager(dynamoDBStore);
     }
 }

@@ -6,9 +6,8 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.lifebook.Lifebook.configuration.Configuration;
-import com.lifebook.Lifebook.configuration.DynamoDBConfig;
-import com.lifebook.Lifebook.dynamodb.DynamoDBStore;
+import com.lifebook.Lifebook.dagger.components.DaggerLifebookComponent;
+import com.lifebook.Lifebook.dagger.components.LifebookComponent;
 import com.lifebook.Lifebook.fetcher.MemoriesDataManager;
 import com.lifebook.Lifebook.mappers.RequestMapper;
 import com.lifebook.Lifebook.model.UnifiedEntity;
@@ -19,10 +18,8 @@ import com.lifebook.Lifebook.model.responses.GetMemoriesResponse;
 import com.lifebook.Lifebook.model.responses.GetMemoryByIdResponse;
 import com.lifebook.Lifebook.model.types.Memory;
 import lombok.AllArgsConstructor;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
-import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 
+import javax.inject.Inject;
 import java.util.Map;
 import java.util.Optional;
 
@@ -37,11 +34,13 @@ public class MemoryHandler implements RequestHandler<APIGatewayProxyRequestEvent
     private final MemoriesDataManager memoriesDataManager;
 
     public MemoryHandler() {
-        DynamoDbEnhancedClient enhancedClient = DynamoDBConfig.createEnhancedClient();
-        DynamoDbTable<UnifiedEntity> lifeEntityTable = enhancedClient
-            .table(LIFE_ENTITIES_TABLE, TableSchema.fromBean(UnifiedEntity.class));
-        this.objectMapper = Configuration.objectMapper();
-        this.memoriesDataManager = new MemoriesDataManager(new DynamoDBStore<UnifiedEntity>(lifeEntityTable, enhancedClient));
+        this(DaggerLifebookComponent.create());
+    }
+
+    @Inject
+    public MemoryHandler(final LifebookComponent lifebookComponent) {
+        this.objectMapper = lifebookComponent.objectMapper();
+        this.memoriesDataManager = lifebookComponent.memoriesDataManager();
     }
 
     @Override

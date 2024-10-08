@@ -3,7 +3,7 @@
 //import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 //import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 //import com.fasterxml.jackson.databind.ObjectMapper;
-//import com.lifebook.Lifebook.configuration.Configuration;
+//import com.lifebook.Lifebook.dagger.modules.Configuration;
 //import com.lifebook.Lifebook.dynamodb.DynamoDBStore;
 //import com.lifebook.Lifebook.fetcher.SongsDataManager;
 //import org.junit.jupiter.api.Test;

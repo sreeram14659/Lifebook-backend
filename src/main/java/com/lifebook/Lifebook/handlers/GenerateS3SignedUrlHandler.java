@@ -5,7 +5,8 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.lifebook.Lifebook.configuration.Configuration;
+import com.lifebook.Lifebook.dagger.components.DaggerLifebookComponent;
+import com.lifebook.Lifebook.dagger.components.LifebookComponent;
 import lombok.AllArgsConstructor;
 import software.amazon.awssdk.core.exception.SdkException;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
@@ -24,7 +25,11 @@ public class GenerateS3SignedUrlHandler implements RequestHandler<APIGatewayProx
     private final ObjectMapper objectMapper;
 
     public GenerateS3SignedUrlHandler() {
-        this.objectMapper = Configuration.objectMapper();
+        this(DaggerLifebookComponent.create());
+    }
+
+    public GenerateS3SignedUrlHandler(final LifebookComponent lifebookComponent) {
+        this.objectMapper = lifebookComponent.objectMapper();
     }
 
     @Override

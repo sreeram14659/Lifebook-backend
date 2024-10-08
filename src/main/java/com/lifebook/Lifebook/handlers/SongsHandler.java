@@ -6,9 +6,8 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.lifebook.Lifebook.configuration.Configuration;
-import com.lifebook.Lifebook.configuration.DynamoDBConfig;
-import com.lifebook.Lifebook.dynamodb.DynamoDBStore;
+import com.lifebook.Lifebook.dagger.components.DaggerLifebookComponent;
+import com.lifebook.Lifebook.dagger.components.LifebookComponent;
 import com.lifebook.Lifebook.fetcher.SongsDataManager;
 import com.lifebook.Lifebook.mappers.RequestMapper;
 import com.lifebook.Lifebook.model.UnifiedEntity;
@@ -18,17 +17,12 @@ import com.lifebook.Lifebook.model.requests.GetSongsRequest;
 import com.lifebook.Lifebook.model.responses.GetSongByIdResponse;
 import com.lifebook.Lifebook.model.responses.GetSongsResponse;
 import com.lifebook.Lifebook.model.types.Song;
-import lombok.AllArgsConstructor;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
-import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 
+import javax.inject.Inject;
 import java.util.Map;
 import java.util.Optional;
 
-@AllArgsConstructor
 public class SongsHandler implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
-    private static final String LIFE_ENTITIES_TABLE = "LifeEntity";
     private static final String GET_SONGS_BY_ID_PATH_REGEX = "^/default/song/[^/]+$";
     private static final String GET_SONGS_PATH = "/default/songs";
     private static final String POST_SONG_PATH = "/default/song";
@@ -37,11 +31,13 @@ public class SongsHandler implements RequestHandler<APIGatewayProxyRequestEvent,
     private final SongsDataManager songsDataManager;
 
     public SongsHandler() {
-        DynamoDbEnhancedClient enhancedClient = DynamoDBConfig.createEnhancedClient();
-        DynamoDbTable<UnifiedEntity> lifeEntityTable = enhancedClient
-            .table(LIFE_ENTITIES_TABLE, TableSchema.fromBean(UnifiedEntity.class));
-        this.objectMapper = Configuration.objectMapper();
-        this.songsDataManager = new SongsDataManager(new DynamoDBStore<UnifiedEntity>(lifeEntityTable, enhancedClient));
+        this(DaggerLifebookComponent.create());
+    }
+
+    @Inject
+    public SongsHandler(LifebookComponent lifebookComponent) {
+        this.objectMapper = lifebookComponent.objectMapper();
+        this.songsDataManager = lifebookComponent.songsDataManager();
     }
 
     @Override
